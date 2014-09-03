@@ -1,0 +1,40 @@
+#!/bin/sh
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+/bin/busybox --install -s
+root=/dev/store/cm-data
+
+mount -t proc proc /proc
+mount -t devtmpfs none /dev
+mount -t sysfs sysfs /sys
+
+echo "[initramfs] Activating LVM..."
+mount -o ro -t ext4 /dev/mmcblk0p13 /boot
+LVM_SYSTEM_DIR=/boot/etc/lvm /boot/usr/sbin/lvm.static vgchange -a y
+sleep 2
+LVM_SYSTEM_DIR=/boot/etc/lvm /boot/usr/sbin/lvm.static vgmknodes
+umount /boot
+
+#echo "[initramfs] Checking root filesystem..."
+#mount -o ro -t ext4 $root /newroot
+#cp /newroot/sbin/e2fsck.static /bin
+#umount /newroot
+#e2fsck.static -p $root
+#if [ $? -eq 2 ]; then
+#	echo "[initramfs] Rebooting in 3 seconds..."
+#	sleep 3
+#	reboot
+#fi
+
+echo "[initramfs] Mounting root filesystem..."
+mount -o rw -t ext4 $root /newroot
+
+echo "[initramfs] Bind mounting Debian filesystem..."
+mkdir /debroot
+mount -o bind /newroot/debian /debroot
+
+mount --move /dev /debroot/dev
+mount --move /proc /debroot/proc
+mount --move /sys /debroot/sys
+
+echo "[initramfs] Switching root..."
+exec switch_root -c /dev/console /debroot /sbin/init --verbose --confdir /etc/init3
