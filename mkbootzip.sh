@@ -12,7 +12,7 @@ rm -rf ./modules/*
 # compile the kernel
 echo "Building kernel"
 cd kernel
-#make debian_tenderloin_defconfig
+make debian_tenderloin_defconfig
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j5 uImage
 make INSTALL_MOD_PATH=../modules modules_install
 cd ..
@@ -20,7 +20,7 @@ cd ..
 # compile the backports
 echo "Building backports"
 cd backports
-#make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- KLIB_BUILD=../kernel KLIB=../modules
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- KLIB_BUILD=../kernel KLIB=../modules defconfig-ath6kl
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- KLIB_BUILD=../kernel KLIB=../modules -j5
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- KLIB_BUILD=../kernel KLIB=../modules install
 cd ..
